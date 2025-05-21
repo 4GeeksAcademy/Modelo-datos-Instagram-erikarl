@@ -5,6 +5,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 db = SQLAlchemy()
 
+class Follower(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    user_from_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_from:  Mapped["User"] = relationship(back_populates = "followers_from")
+
+    user_to_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_to:  Mapped["User"] = relationship(back_populates = "followers_to")
+
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
@@ -12,10 +21,10 @@ class User(db.Model):
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
     followers_from: Mapped[List["Follower"]] = relationship(
-        back_populates="user_from", foreign_keys="[Follower.user_from_id]"
+        back_populates="user_from", foreign_keys=[Follower.user_from_id]
     )
     followers_to: Mapped[List["Follower"]] = relationship(
-        back_populates="user_to", foreign_keys="[Follower.user_to_id]"
+        back_populates="user_to", foreign_keys=[Follower.user_to_id]
     )
 
     comments: Mapped[List["Comment"]] = relationship(back_populates = "author")
@@ -60,12 +69,3 @@ class Media(db.Model):
 
     post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
     post: Mapped["Post"] = relationship(back_populates="medias")
-
-class Follower(db.Model):
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    user_from_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    user_from:  Mapped["User"] = relationship(back_populates = "followers_from")
-
-    user_to_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    user_to:  Mapped["User"] = relationship(back_populates = "followers_to")
